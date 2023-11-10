@@ -23,14 +23,12 @@ public class AttachmentServiceImpl implements AttachmentService {
 
         String fileName = StringUtils.cleanPath(Objects.requireNonNull(file.getOriginalFilename()));
 
+        if (fileName.contains("..")) {
+            throw new Exception("Filename contains invalid path sequence " + fileName);
+        }
+
         try {
-
-            if (fileName.contains("..")) {
-                throw new Exception("Filename contains invalid path sequence " + fileName);
-            }
-
-            Attachment attachment = Attachment
-                    .builder()
+            Attachment attachment = Attachment.builder()
                     .fileType(file.getContentType())
                     .data(file.getBytes())
                     .fileName(file.getOriginalFilename())
@@ -46,9 +44,8 @@ public class AttachmentServiceImpl implements AttachmentService {
 
     @Override
     public Attachment getAttachment(String fileId) throws AttachmentNotFoundException {
-        return attachmentRepository.findById(fileId).orElseThrow(
-                () -> new AttachmentNotFoundException("File not found with id: " + fileId)
-        );
+        return attachmentRepository.findById(fileId)
+                .orElseThrow(() -> new AttachmentNotFoundException("File not found with id: " + fileId));
     }
 
     @Override
@@ -59,7 +56,7 @@ public class AttachmentServiceImpl implements AttachmentService {
         String status = attachmentDTO.getStatus();
         double percent = attachmentDTO.getPercent();
 
-        if (Objects.nonNull(status)) {
+        if (status != null) {
             attachment.setStatus(Status.valueOf(status));
         }
 

@@ -29,14 +29,8 @@ public class AttachmentController {
 
     @PostMapping("/upload")
     public ResponseData uploadFile(@RequestParam("file") MultipartFile file) throws Exception {
-
-        Attachment attachment = attachmentService.saveAttachment(file);;
-
-        String downloadURL = ServletUriComponentsBuilder.fromCurrentContextPath()
-                .path("/attachments/download/")
-                .path(attachment.getId())
-                .toUriString();
-
+        Attachment attachment = attachmentService.saveAttachment(file);
+        String downloadURL = createDownloadURL(attachment.getId());
         return new ResponseData(
                 "image",
                 List.of(new AttachmentDTO(attachment.getId(), downloadURL, attachment.getStatus().toString(), attachment.getPercent())));
@@ -44,35 +38,32 @@ public class AttachmentController {
 
     @PostMapping("/uploads")
     public ResponseData uploadFiles(@RequestParam("file") MultipartFile ... files) throws Exception {
-
         List<Attachment> attachments = new ArrayList<>();
         List<AttachmentDTO> attachmentDTOS = new ArrayList<>();
-
         for (MultipartFile file : files) {
             Attachment attachment = attachmentService.saveAttachment(file);
             attachments.add(attachment);
         }
-
         for (Attachment attachment : attachments) {
-            String downloadURL = ServletUriComponentsBuilder.fromCurrentContextPath()
-                    .path("/attachments/download/")
-                    .path(attachment.getId())
-                    .toUriString();
-
+            String downloadURL = createDownloadURL(attachment.getId());
             attachmentDTOS.add(new AttachmentDTO(attachment.getId(), downloadURL, attachment.getStatus().toString(), attachment.getPercent()));
         }
-
         return ResponseData.builder()
                 .type("images")
                 .attachments(attachmentDTOS)
                 .build();
     }
 
+    private String createDownloadURL(String fileId) {
+        return ServletUriComponentsBuilder.fromCurrentContextPath()
+                .path("/attachments/download/")
+                .path(fileId)
+                .toUriString();
+    }
+
     @GetMapping("/download/{fileId}")
     public ResponseEntity<Resource> downloadFile(@PathVariable("fileId") String fileId) throws AttachmentNotFoundException {
-
         Attachment attachment = attachmentService.getAttachment(fileId);
-
         return ResponseEntity.ok()
                 .contentType(MediaType.parseMediaType(attachment.getFileType()))
                 .header(HttpHeaders.CONTENT_DISPOSITION,
@@ -89,5 +80,4 @@ public class AttachmentController {
     public ResponseEntity<AttachmentDTO> updateAttachmentByDownloadURL(@RequestParam("downloadURL") String downloadURL, @RequestBody AttachmentDTO attachmentDTO) throws AttachmentNotFoundException {
         return new ResponseEntity<>(attachmentService.updateAttachmentByDownloadURL(downloadURL, attachmentDTO), HttpStatus.OK);
     }
-
 }
