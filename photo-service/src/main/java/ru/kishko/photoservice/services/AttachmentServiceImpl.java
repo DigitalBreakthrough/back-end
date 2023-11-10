@@ -4,7 +4,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
+import ru.kishko.photoservice.dtos.AttachmentDTO;
 import ru.kishko.photoservice.entities.Attachment;
+import ru.kishko.photoservice.entities.Status;
 import ru.kishko.photoservice.errors.AttachmentNotFoundException;
 import ru.kishko.photoservice.repositories.AttachmentRepository;
 
@@ -47,5 +49,30 @@ public class AttachmentServiceImpl implements AttachmentService {
         return attachmentRepository.findById(fileId).orElseThrow(
                 () -> new AttachmentNotFoundException("File not found with id: " + fileId)
         );
+    }
+
+    @Override
+    public AttachmentDTO updateAttachmentByDownloadURL(String downloadURL, AttachmentDTO attachmentDTO) throws AttachmentNotFoundException {
+
+        Attachment attachment = getAttachment(downloadURL.substring(43));
+
+        String status = attachmentDTO.getStatus();
+        double percent = attachmentDTO.getPercent();
+
+        if (Objects.nonNull(status)) {
+            attachment.setStatus(Status.valueOf(status));
+        }
+
+        if (percent > 0) {
+            attachment.setPercent(percent);
+        }
+
+        attachmentRepository.save(attachment);
+
+        return AttachmentDTO.builder()
+                .downloadURL(downloadURL)
+                .status(attachment.getStatus().toString())
+                .percent(attachment.getPercent())
+                .build();
     }
 }

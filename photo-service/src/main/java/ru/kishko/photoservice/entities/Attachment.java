@@ -30,6 +30,13 @@ public class Attachment implements Serializable {
     @Column(name = "fileType")
     private String fileType;
 
+    @Column(name = "status")
+    @Enumerated(EnumType.STRING)
+    private Status status;
+
+    @Column(name = "percent")
+    private double percent;
+
     @JsonIgnore
     @Lob
     private byte[] data;
@@ -45,5 +52,14 @@ public class Attachment implements Serializable {
     @Override
     public int hashCode() {
         return getClass().hashCode();
+    }
+
+    @PrePersist
+    public void setDefaultStatus() {
+
+        if (this.status == null) {
+            status = Status.OK; // установка дефолтного значения
+        }
+
     }
 }
