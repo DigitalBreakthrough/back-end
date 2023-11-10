@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 import ru.kishko.photoservice.config.AttachmentMapper;
+import ru.kishko.photoservice.controllers.AttachmentController;
 import ru.kishko.photoservice.dtos.AttachmentDTO;
 import ru.kishko.photoservice.dtos.AttachmentDTOShort;
 import ru.kishko.photoservice.entities.Attachment;
@@ -58,9 +59,9 @@ public class AttachmentServiceImpl implements AttachmentService {
     }
 
     @Override
-    public AttachmentDTOShort updateAttachmentByDownloadURL(String downloadURL, AttachmentDTOShort attachmentDTOShort) throws AttachmentNotFoundException {
+    public AttachmentDTOShort updateAttachmentByDownloadURL(String attachmentId, AttachmentDTOShort attachmentDTOShort) throws AttachmentNotFoundException {
 
-        AttachmentDTO attachmentDB = getAttachment(downloadURL.substring(43));
+        AttachmentDTO attachmentDB = getAttachment(attachmentId);
 
         String status = attachmentDTOShort.getStatus();
         double percent = attachmentDTOShort.getPercent();
@@ -76,7 +77,7 @@ public class AttachmentServiceImpl implements AttachmentService {
         attachmentRepository.save(attachmentMapper.toAttachment(attachmentDB));
 
         return AttachmentDTOShort.builder()
-                .downloadURL(downloadURL)
+                .downloadURL(AttachmentController.createDownloadURL(attachmentId))
                 .status(attachmentDB.getStatus())
                 .percent(attachmentDB.getPercent())
                 .build();

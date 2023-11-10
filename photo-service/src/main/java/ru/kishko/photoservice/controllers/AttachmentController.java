@@ -54,7 +54,7 @@ public class AttachmentController {
                 .build();
     }
 
-    private String createDownloadURL(String fileId) {
+    public static String createDownloadURL(String fileId) {
         return ServletUriComponentsBuilder.fromCurrentContextPath()
                 .path("/attachments/download/")
                 .path(fileId)
@@ -77,7 +77,7 @@ public class AttachmentController {
     }
 
     @PutMapping
-    public ResponseEntity<AttachmentDTOShort> updateAttachmentByDownloadURL(@RequestParam("downloadURL") String downloadURL, @RequestBody AttachmentDTOShort attachmentDTOShort) throws AttachmentNotFoundException {
-        return new ResponseEntity<>(attachmentService.updateAttachmentByDownloadURL(downloadURL, attachmentDTOShort), HttpStatus.OK);
+    public ResponseEntity<AttachmentDTOShort> updateAttachmentByDownloadURL(@RequestParam("fileId") String fileId, @RequestBody AttachmentDTOShort attachmentDTOShort) throws AttachmentNotFoundException {
+        return new ResponseEntity<>(attachmentService.updateAttachmentByDownloadURL(fileId, attachmentDTOShort), HttpStatus.OK);
     }
 }
