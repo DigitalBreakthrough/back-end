@@ -10,19 +10,15 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class AttachmentDTO {
+public class AttachmentDTOShort {
 
+    @JsonIgnore
     private String id;
 
-    private String fileName;
-
-    private String fileType;
+    private String downloadURL;
 
     private String status;
 
     private double percent;
-
-    @JsonIgnore
-    private byte[] data;
 
 }

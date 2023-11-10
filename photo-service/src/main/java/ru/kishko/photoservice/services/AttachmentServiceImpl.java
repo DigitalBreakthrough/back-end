@@ -4,9 +4,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
+import ru.kishko.photoservice.config.AttachmentMapper;
 import ru.kishko.photoservice.dtos.AttachmentDTO;
+import ru.kishko.photoservice.dtos.AttachmentDTOShort;
 import ru.kishko.photoservice.entities.Attachment;
-import ru.kishko.photoservice.entities.Status;
 import ru.kishko.photoservice.errors.AttachmentNotFoundException;
 import ru.kishko.photoservice.repositories.AttachmentRepository;
 
@@ -16,10 +17,13 @@ import java.util.Objects;
 public class AttachmentServiceImpl implements AttachmentService {
 
     @Autowired
+    private AttachmentMapper attachmentMapper;
+
+    @Autowired
     private AttachmentRepository attachmentRepository;
 
     @Override
-    public Attachment saveAttachment(MultipartFile file) throws Exception {
+    public AttachmentDTO saveAttachment(MultipartFile file) throws Exception {
 
         String fileName = StringUtils.cleanPath(Objects.requireNonNull(file.getOriginalFilename()));
 
@@ -34,7 +38,9 @@ public class AttachmentServiceImpl implements AttachmentService {
                     .fileName(file.getOriginalFilename())
                     .build();
 
-            return attachmentRepository.save(attachment);
+            attachmentRepository.save(attachment);
+
+            return attachmentMapper.toAttachmentDTO(attachment);
 
         } catch (Exception e) {
             throw new Exception("Couldn't save a file " + fileName + " \n " + e);
@@ -43,33 +49,36 @@ public class AttachmentServiceImpl implements AttachmentService {
     }
 
     @Override
-    public Attachment getAttachment(String fileId) throws AttachmentNotFoundException {
-        return attachmentRepository.findById(fileId)
+    public AttachmentDTO getAttachment(String fileId) throws AttachmentNotFoundException {
+
+        Attachment attachment = attachmentRepository.findById(fileId)
                 .orElseThrow(() -> new AttachmentNotFoundException("File not found with id: " + fileId));
+
+        return attachmentMapper.toAttachmentDTO(attachment);
     }
 
     @Override
-    public AttachmentDTO updateAttachmentByDownloadURL(String downloadURL, AttachmentDTO attachmentDTO) throws AttachmentNotFoundException {
+    public AttachmentDTOShort updateAttachmentByDownloadURL(String downloadURL, AttachmentDTOShort attachmentDTOShort) throws AttachmentNotFoundException {
 
-        Attachment attachment = getAttachment(downloadURL.substring(43));
+        AttachmentDTO attachmentDB = getAttachment(downloadURL.substring(43));
 
-        String status = attachmentDTO.getStatus();
-        double percent = attachmentDTO.getPercent();
+        String status = attachmentDTOShort.getStatus();
+        double percent = attachmentDTOShort.getPercent();
 
         if (status != null) {
-            attachment.setStatus(Status.valueOf(status));
+            attachmentDB.setStatus(status);
         }
 
         if (percent > 0) {
-            attachment.setPercent(percent);
+            attachmentDB.setPercent(percent);
         }
 
-        attachmentRepository.save(attachment);
+        attachmentRepository.save(attachmentMapper.toAttachment(attachmentDB));
 
-        return AttachmentDTO.builder()
+        return AttachmentDTOShort.builder()
                 .downloadURL(downloadURL)
-                .status(attachment.getStatus().toString())
-                .percent(attachment.getPercent())
+                .status(attachmentDB.getStatus())
+                .percent(attachmentDB.getPercent())
                 .build();
     }
 }

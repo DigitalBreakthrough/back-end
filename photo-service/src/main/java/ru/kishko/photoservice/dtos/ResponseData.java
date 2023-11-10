@@ -15,6 +15,6 @@ public class ResponseData {
 
     private String type;
 
-    private List<AttachmentDTO> attachments;
+    private List<AttachmentDTOShort> attachments;
 
 }
