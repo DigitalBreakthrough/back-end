@@ -37,6 +37,9 @@ public class Attachment implements Serializable {
     @Column(name = "percent")
     private double percent;
 
+    @Column(name = "camName")
+    private String camName;
+
     @JsonIgnore
     @Lob
     private byte[] data;
@@ -58,7 +61,11 @@ public class Attachment implements Serializable {
     public void setDefaultStatus() {
 
         if (this.status == null) {
-            status = Status.OK; // установка дефолтного значения
+            status = Status.FALSE; // установка дефолтного значения
+        }
+
+        if (this.camName == null) {
+            camName = ""; // установка дефолтного значения
         }
 
     }

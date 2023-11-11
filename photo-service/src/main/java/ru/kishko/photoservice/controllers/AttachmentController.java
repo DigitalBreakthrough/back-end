@@ -33,11 +33,11 @@ public class AttachmentController {
         String downloadURL = createDownloadURL(attachment.getId());
         return new ResponseData(
                 "image",
-                List.of(new AttachmentDTOShort(attachment.getId(), downloadURL, attachment.getStatus(), attachment.getPercent())));
+                List.of(new AttachmentDTOShort(attachment.getId(), downloadURL, attachment.getStatus(), attachment.getCamName(), attachment.getPercent())));
     }
 
     @PostMapping("/uploads")
-    public ResponseData uploadFiles(@RequestParam("file") MultipartFile ... files) throws Exception {
+    public ResponseEntity<ResponseData> uploadFiles(@RequestParam("file") MultipartFile ... files) throws Exception {
         List<AttachmentDTO> attachments = new ArrayList<>();
         List<AttachmentDTOShort> attachmentDTOShorts = new ArrayList<>();
         for (MultipartFile file : files) {
@@ -46,12 +46,17 @@ public class AttachmentController {
         }
         for (AttachmentDTO attachment : attachments) {
             String downloadURL = createDownloadURL(attachment.getId());
-            attachmentDTOShorts.add(new AttachmentDTOShort(attachment.getId(), downloadURL, attachment.getStatus(), attachment.getPercent()));
+            attachmentDTOShorts.add(new AttachmentDTOShort(attachment.getId(), downloadURL, attachment.getStatus(), attachment.getCamName(), attachment.getPercent()));
         }
-        return ResponseData.builder()
+
+        ResponseData responseData = ResponseData.builder()
                 .type("images")
                 .attachments(attachmentDTOShorts)
                 .build();
+
+        System.out.println(responseData);
+
+        return sendAttachments(responseData);
     }
 
     public static String createDownloadURL(String fileId) {
@@ -76,8 +81,13 @@ public class AttachmentController {
         return new ResponseEntity<>(attachmentService.getAttachment(fileId), HttpStatus.OK);
     }
 
+    @GetMapping("/send")
+    public ResponseEntity<ResponseData> sendAttachments(@RequestBody ResponseData responseData) {
+        return new ResponseEntity<>(attachmentService.sendAttachments(responseData), HttpStatus.OK);
+    }
+
     @PutMapping
-    public ResponseEntity<AttachmentDTOShort> updateAttachmentByDownloadURL(@RequestParam("fileId") String fileId, @RequestBody AttachmentDTOShort attachmentDTOShort) throws AttachmentNotFoundException {
-        return new ResponseEntity<>(attachmentService.updateAttachmentByDownloadURL(fileId, attachmentDTOShort), HttpStatus.OK);
+    public ResponseEntity<AttachmentDTOShort> updateAttachmentById(@RequestParam("fileId") String fileId, @RequestBody AttachmentDTOShort attachmentDTOShort, @RequestParam("bytes") byte[] bytes) throws AttachmentNotFoundException {
+        return new ResponseEntity<>(attachmentService.updateAttachmentById(fileId, attachmentDTOShort, bytes), HttpStatus.OK);
     }
 }

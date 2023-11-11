@@ -1,13 +1,16 @@
 package ru.kishko.photoservice.services;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.reactive.function.client.WebClient;
 import ru.kishko.photoservice.config.AttachmentMapper;
 import ru.kishko.photoservice.controllers.AttachmentController;
 import ru.kishko.photoservice.dtos.AttachmentDTO;
 import ru.kishko.photoservice.dtos.AttachmentDTOShort;
+import ru.kishko.photoservice.dtos.ResponseData;
 import ru.kishko.photoservice.entities.Attachment;
 import ru.kishko.photoservice.errors.AttachmentNotFoundException;
 import ru.kishko.photoservice.repositories.AttachmentRepository;
@@ -22,6 +25,9 @@ public class AttachmentServiceImpl implements AttachmentService {
 
     @Autowired
     private AttachmentRepository attachmentRepository;
+
+    @Autowired
+    private WebClient webMLClient;
 
     @Override
     public AttachmentDTO saveAttachment(MultipartFile file) throws Exception {
@@ -59,12 +65,13 @@ public class AttachmentServiceImpl implements AttachmentService {
     }
 
     @Override
-    public AttachmentDTOShort updateAttachmentByDownloadURL(String attachmentId, AttachmentDTOShort attachmentDTOShort) throws AttachmentNotFoundException {
+    public AttachmentDTOShort updateAttachmentById(String attachmentId, AttachmentDTOShort attachmentDTOShort, byte[] changeData) throws AttachmentNotFoundException {
 
         AttachmentDTO attachmentDB = getAttachment(attachmentId);
 
         String status = attachmentDTOShort.getStatus();
         double percent = attachmentDTOShort.getPercent();
+        String camName = attachmentDB.getCamName();
 
         if (status != null) {
             attachmentDB.setStatus(status);
@@ -74,12 +81,35 @@ public class AttachmentServiceImpl implements AttachmentService {
             attachmentDB.setPercent(percent);
         }
 
+        if (Objects.nonNull(camName) && !"".equals(camName)) {
+            attachmentDB.setCamName(camName);
+        }
+
+        attachmentDB.setData(changeData);
+
         attachmentRepository.save(attachmentMapper.toAttachment(attachmentDB));
 
         return AttachmentDTOShort.builder()
                 .downloadURL(AttachmentController.createDownloadURL(attachmentId))
                 .status(attachmentDB.getStatus())
                 .percent(attachmentDB.getPercent())
+                .camName(attachmentDB.getCamName())
                 .build();
     }
+
+    @Override
+    public ResponseData sendAttachments(ResponseData responseData) {
+
+        System.out.println(responseData);
+
+        return webMLClient.post()
+                .uri("/uploadImage")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(responseData)
+                .retrieve()
+                .bodyToMono(ResponseData.class)
+                .block();
+    }
+
+
 }

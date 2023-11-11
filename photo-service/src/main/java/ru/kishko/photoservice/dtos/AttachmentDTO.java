@@ -22,6 +22,8 @@ public class AttachmentDTO {
 
     private double percent;
 
+    private String camName;
+
     @JsonIgnore
     private byte[] data;
 
