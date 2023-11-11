@@ -15,6 +15,9 @@ import ru.kishko.photoservice.entities.Attachment;
 import ru.kishko.photoservice.errors.AttachmentNotFoundException;
 import ru.kishko.photoservice.repositories.AttachmentRepository;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.Objects;
 
 @Service
@@ -65,15 +68,13 @@ public class AttachmentServiceImpl implements AttachmentService {
     }
 
     @Override
-    public AttachmentDTOShort updateAttachmentById(String attachmentId, AttachmentDTOShort attachmentDTOShort, byte[] changeData) throws AttachmentNotFoundException {
+    public AttachmentDTOShort updateAttachmentById(String fileId, String status, double percent, String camName, String bytes) throws AttachmentNotFoundException {
 
-        AttachmentDTO attachmentDB = getAttachment(attachmentId);
+        AttachmentDTO attachmentDB = getAttachment(fileId);
 
-        String status = attachmentDTOShort.getStatus();
-        double percent = attachmentDTOShort.getPercent();
-        String camName = attachmentDB.getCamName();
+        System.out.println(percent + " " + status);
 
-        if (status != null) {
+        if (status != null && !"".equals(status)) {
             attachmentDB.setStatus(status);
         }
 
@@ -85,12 +86,12 @@ public class AttachmentServiceImpl implements AttachmentService {
             attachmentDB.setCamName(camName);
         }
 
-        attachmentDB.setData(changeData);
+        attachmentDB.setData(Base64.getDecoder().decode(bytes.getBytes(StandardCharsets.UTF_8)));
 
         attachmentRepository.save(attachmentMapper.toAttachment(attachmentDB));
 
         return AttachmentDTOShort.builder()
-                .downloadURL(AttachmentController.createDownloadURL(attachmentId))
+                .downloadURL(AttachmentController.createDownloadURL(fileId))
                 .status(attachmentDB.getStatus())
                 .percent(attachmentDB.getPercent())
                 .camName(attachmentDB.getCamName())

@@ -18,6 +18,7 @@ public class AttachmentMapper {
                 .data(attachmentDTO.getData())
                 .percent(attachmentDTO.getPercent())
                 .status(Status.valueOf(attachmentDTO.getStatus()))
+                .camName(attachmentDTO.getCamName())
                 .build();
     }
 
@@ -29,6 +30,7 @@ public class AttachmentMapper {
                 .data(attachment.getData())
                 .percent(attachment.getPercent())
                 .status(attachment.getStatus().toString())
+                .camName(attachment.getCamName())
                 .build();
     }
 }

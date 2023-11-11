@@ -16,7 +16,9 @@ import ru.kishko.photoservice.dtos.ResponseData;
 import ru.kishko.photoservice.errors.AttachmentNotFoundException;
 import ru.kishko.photoservice.services.AttachmentService;
 
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
 
 @RestController
@@ -86,8 +88,8 @@ public class AttachmentController {
         return new ResponseEntity<>(attachmentService.sendAttachments(responseData), HttpStatus.OK);
     }
 
-    @PutMapping
-    public ResponseEntity<AttachmentDTOShort> updateAttachmentById(@RequestParam("fileId") String fileId, @RequestBody AttachmentDTOShort attachmentDTOShort, @RequestParam("bytes") byte[] bytes) throws AttachmentNotFoundException {
-        return new ResponseEntity<>(attachmentService.updateAttachmentById(fileId, attachmentDTOShort, bytes), HttpStatus.OK);
+    @PostMapping
+    public ResponseEntity<AttachmentDTOShort> updateAttachmentById(@RequestParam("fileId") String fileId, @RequestParam("status") String status, @RequestParam("percent") double percent, @RequestParam("camName") String camName, @RequestParam("bytes") String bytes) throws AttachmentNotFoundException {
+        return new ResponseEntity<>(attachmentService.updateAttachmentById(fileId, status, percent, camName, bytes), HttpStatus.OK);
     }
 }

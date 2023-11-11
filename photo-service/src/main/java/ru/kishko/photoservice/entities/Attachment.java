@@ -65,7 +65,7 @@ public class Attachment implements Serializable {
         }
 
         if (this.camName == null) {
-            camName = ""; // установка дефолтного значения
+            camName = "DpR-Csp-uipv-ShV-V1"; // установка дефолтного значения
         }
 
     }
