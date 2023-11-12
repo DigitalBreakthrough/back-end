@@ -33,7 +33,7 @@ public class AttachmentServiceImpl implements AttachmentService {
     private WebClient webMLClient;
 
     @Override
-    public AttachmentDTO saveAttachment(MultipartFile file) throws Exception {
+    public AttachmentDTO saveAttachment(MultipartFile file, String camName) throws Exception {
 
         String fileName = StringUtils.cleanPath(Objects.requireNonNull(file.getOriginalFilename()));
 
@@ -46,6 +46,7 @@ public class AttachmentServiceImpl implements AttachmentService {
                     .fileType(file.getContentType())
                     .data(file.getBytes())
                     .fileName(file.getOriginalFilename())
+                    .camName(camName)
                     .build();
 
             attachmentRepository.save(attachment);

@@ -9,7 +9,7 @@ import ru.kishko.photoservice.errors.AttachmentNotFoundException;
 import java.io.IOException;
 
 public interface AttachmentService {
-    AttachmentDTO saveAttachment(MultipartFile file) throws Exception;
+    AttachmentDTO saveAttachment(MultipartFile file, String camName) throws Exception;
 
     AttachmentDTO getAttachment(String fileId) throws AttachmentNotFoundException;
 

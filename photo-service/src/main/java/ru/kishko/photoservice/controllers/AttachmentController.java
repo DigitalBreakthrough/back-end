@@ -29,21 +29,12 @@ public class AttachmentController {
 
     private final AttachmentService attachmentService;
 
-    @PostMapping("/upload")
-    public ResponseData uploadFile(@RequestParam("file") MultipartFile file) throws Exception {
-        AttachmentDTO attachment = attachmentService.saveAttachment(file);
-        String downloadURL = createDownloadURL(attachment.getId());
-        return new ResponseData(
-                "image",
-                List.of(new AttachmentDTOShort(attachment.getId(), downloadURL, attachment.getStatus(), attachment.getCamName(), attachment.getPercent())));
-    }
-
     @PostMapping("/uploads")
-    public ResponseEntity<ResponseData> uploadFiles(@RequestParam("file") MultipartFile ... files) throws Exception {
+    public ResponseEntity<ResponseData> uploadFiles(@RequestParam("camName") String camName, @RequestParam("file") MultipartFile ... files) throws Exception {
         List<AttachmentDTO> attachments = new ArrayList<>();
         List<AttachmentDTOShort> attachmentDTOShorts = new ArrayList<>();
         for (MultipartFile file : files) {
-            AttachmentDTO attachment = attachmentService.saveAttachment(file);
+            AttachmentDTO attachment = attachmentService.saveAttachment(file, camName);
             attachments.add(attachment);
         }
         for (AttachmentDTO attachment : attachments) {
